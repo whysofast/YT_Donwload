@@ -2,7 +2,7 @@ import youtube_dl
 import os
 import sys
 from PyQt5.QtWidgets import QStyleFactory, QApplication, QVBoxLayout, QGroupBox, QPushButton,\
-     QDialog, QGridLayout, QLineEdit, QComboBox, QLabel
+     QDialog, QGridLayout, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
 from tkinter import Tk
 
