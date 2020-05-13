@@ -1,16 +1,17 @@
 import youtube_dl
 import os
 import sys
-from PyQt5.QtWidgets import QStyleFactory, QApplication, QVBoxLayout, QGroupBox, QPushButton,\
-     QDialog, QGridLayout, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QStyleFactory, QApplication, QVBoxLayout, QGroupBox, QPushButton, \
+    QDialog, QGridLayout, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
 from tkinter import Tk
+
 
 class mainWindow(QDialog):
 
     def __init__(self):
-        self.download_path = 'F:\Músicas\YT Songs'.replace('/','\\')
-        #self.download_path = 'YT Songs'.replace('/','\\')
+        self.download_path = 'F:\Músicas\YT Songs'.replace('/', '\\')
+        # self.download_path = 'YT Songs'.replace('/','\\')
         self.mp3_options = {
             'format': 'bestaudio/best',
             'postprocessors': [{
@@ -21,13 +22,15 @@ class mainWindow(QDialog):
             'outtmpl': '%(title)s.%(ext)s',
             'prefer_ffmpeg': True,
             'keepvideo': False,
+            'playliststart': 1,
         }
 
         self.mp4_options = {
             'format': 'bestvideo+bestaudio[ext=m4a]/best',
-            #'format': '136+bestaudio[ext=m4a]/best',
-            #'listformats': True,
-            'outtmpl': '%(title)s.%(ext)s'
+            # 'format': '136+bestaudio[ext=m4a]/best',
+            # 'listformats': True,
+            'outtmpl': '%(title)s.%(ext)s',
+            'playliststart': 1,
         }
 
         if not os.path.exists(self.download_path):
@@ -44,7 +47,8 @@ class mainWindow(QDialog):
 
         self.Dialog_Layout = QVBoxLayout()
 
-        self.GroupBox = QGroupBox('Video or Playlist url: ')
+        self.GroupBox = QGroupBox(
+            'Video or Playlist url:                             Path:                                           Playlist Start:')
         self.GroupBox_Layout = QGridLayout()
         self.GroupBox_Layout.setAlignment(Qt.AlignCenter)
 
@@ -59,6 +63,16 @@ class mainWindow(QDialog):
         self.LineEdit.setPlaceholderText("Enter a valid URL")
         self.LineEdit.setText(ctrlc)
         self.LineEdit.setMinimumWidth(150)
+
+        self.SavePath = QLineEdit()
+        self.SavePath.setPlaceholderText("Enter a valid Path")
+        self.SavePath.setText(self.download_path)
+        self.SavePath.setMinimumWidth(150)
+
+        self.Playliststart = QLineEdit()
+        self.Playliststart.setPlaceholderText("Enter a valid Path")
+        self.Playliststart.setText('1')
+        self.Playliststart.setMinimumWidth(40)
 
         self.QualityComboBox_GroupBox = QGroupBox("MP3 Quality")
         self.QualityComboBox_GroupBox_layout = QVBoxLayout()
@@ -83,7 +97,9 @@ class mainWindow(QDialog):
         self.Qualitymp4ComboBox_GroupBox_layout.addWidget(self.Download_Buttonmp4)
 
         self.GroupBox_Layout.addWidget(self.LineEdit, 0, 0)
-        self.GroupBox_Layout.addWidget(self.Close_Button, 1,1)
+        self.GroupBox_Layout.addWidget(self.SavePath, 0, 1)
+        self.GroupBox_Layout.addWidget(self.Playliststart, 0, 2)
+        self.GroupBox_Layout.addWidget(self.Close_Button, 1, 1)
         self.GroupBox_Layout.addWidget(self.QualityComboBox_GroupBox, 1, 0)
         self.GroupBox_Layout.addWidget(self.Qualitymp4ComboBox_GroupBox, 2, 0)
 
@@ -93,43 +109,48 @@ class mainWindow(QDialog):
         self.setLayout(self.Dialog_Layout)
 
     def download_btn(self):
+        self.download_path = self.SavePath.text()
+        self.mp3_options['playliststart'] = int(self.Playliststart.text())
+        self.LineEdit.setStyleSheet("color: blue;")
         url = self.LineEdit.text()
         self.quality = self.QualityComboBox.currentText().split(" kbps")[0]
         self.mp3_options['postprocessors'][0]['preferredquality'] = self.quality
         self.mp3_options['outtmpl'] = '%(title)s - ' + self.QualityComboBox.currentText() + '.%(ext)s'
-        #print(f'Quality of mp3 chosen: {self.quality}')
+        # print(f'Quality of mp3 chosen: {self.quality}')
         try:
             with youtube_dl.YoutubeDL(self.mp3_options) as dl:
                 dl.download([url])
 
-        except:
+        except youtube_dl.utils.YoutubeDLError:
             self.raise_error()
 
     def download_btnmp4(self):
         url = self.LineEdit.text()
-        self.qualitymp4  = self.Qualitymp4ComboBox.currentText()
+        self.LineEdit.setStyleSheet("color: blue;")
+        self.qualitymp4 = self.Qualitymp4ComboBox.currentText()
+        self.mp4_options['playliststart'] = int(self.Playliststart.text())
         if self.qualitymp4 == 'Best as possible':
-            self.mp4_options['format']= 'bestvideo+bestaudio[ext=m4a]/best'
-            self.mp4_options['outtmpl']= '%(title)s' + ' - Best' + '.%(ext)s'
+            self.mp4_options['format'] = 'bestvideo+bestaudio[ext=m4a]/best'
+            self.mp4_options['outtmpl'] = '%(title)s' + ' - Best' + '.%(ext)s'
         elif self.qualitymp4 == 'Force 720p':
-            self.mp4_options['format']= '136+bestaudio[ext=m4a]/best'
-            self.mp4_options['outtmpl']= '%(title)s' + ' - 720p' + '.%(ext)s'
+            self.mp4_options['format'] = '136+bestaudio[ext=m4a]/best'
+            self.mp4_options['outtmpl'] = '%(title)s' + ' - 720p' + '.%(ext)s'
         elif self.qualitymp4 == 'Force 480p':
-            self.mp4_options['format']= '135+bestaudio[ext=m4a]/best'
-            self.mp4_options['outtmpl']= '%(title)s' + ' - 480p' + '.%(ext)s'
+            self.mp4_options['format'] = '135+bestaudio[ext=m4a]/best'
+            self.mp4_options['outtmpl'] = '%(title)s' + ' - 480p' + '.%(ext)s'
 
         try:
             with youtube_dl.YoutubeDL(self.mp4_options) as dl:
                 dl.download([url])
-                #result = dl.extract_info("{}".format(url))
-                #print(result)
+                # result = dl.extract_info("{}".format(url))
+                # print(result)
                 # print(result.get("id", None))
         except:
             self.raise_error()
-            
+
     def raise_error(self):
-        self.LineEdit.clear()
         self.LineEdit.setStyleSheet("color: red;")
+
 
 if __name__ == '__main__':
     APP = QApplication(sys.argv)
@@ -146,4 +167,3 @@ if __name__ == '__main__':
     GUI.show()
 
     sys.exit(APP.exec())
-
