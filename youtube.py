@@ -10,7 +10,7 @@ from tkinter import Tk
 class mainWindow(QDialog):
 
     def __init__(self):
-        self.download_path = 'F:\Músicas\YT Songs'.replace('/', '\\')
+        self.download_path = 'C:/Users/mathe/Music'.replace('/', '\\')
         # self.download_path = 'YT Songs'.replace('/','\\')
         self.mp3_options = {
             'format': 'bestaudio/best',
@@ -18,6 +18,9 @@ class mainWindow(QDialog):
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '320'
+            }],
+            'postprocessors-args': [{
+                '-ss': '3:59:10'
             }],
             'outtmpl': '%(title)s.%(ext)s',
             'prefer_ffmpeg': True,
@@ -115,7 +118,7 @@ class mainWindow(QDialog):
         url = self.LineEdit.text()
         self.quality = self.QualityComboBox.currentText().split(" kbps")[0]
         self.mp3_options['postprocessors'][0]['preferredquality'] = self.quality
-        self.mp3_options['outtmpl'] = '%(title)s - ' + self.QualityComboBox.currentText() + '.%(ext)s'
+        self.mp3_options['outtmpl'] = '%(title)s ' + '.%(ext)s'
         # print(f'Quality of mp3 chosen: {self.quality}')
         try:
             with youtube_dl.YoutubeDL(self.mp3_options) as dl:
